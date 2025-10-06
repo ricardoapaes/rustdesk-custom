@@ -2,7 +2,12 @@ version: '3.8'
 
 services:
   rustdesk-builder:
-    build: .
+    # Use a imagem pré-construída (recomendado)
+    image: ghcr.io/ricardoapaes/rustdesk-custom:latest
+    
+    # Ou faça build local (descomente a linha abaixo e comente a linha 'image')
+    # build: .
+    
     environment:
       # Variáveis carregadas do arquivo .env
       - ID_SERVER_HOST=${ID_SERVER_HOST}
