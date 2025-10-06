@@ -1,41 +1,50 @@
 # Dockerfile para gerar instalador RustDesk personalizado
 FROM docker.io/amake/innosetup:latest
 
-# Configurar usuário root temporariamente para instalações
+# Instalar dependências como root primeiro
 USER root
-
-# Instalar dependências necessárias
 RUN apt-get update && apt-get install -y \
     curl \
     jq \
     unzip \
     wget \
     ca-certificates \
+    sudo \
     && rm -rf /var/lib/apt/lists/*
 
-# Criar diretório de trabalho
+# Verificar e corrigir permissões do Wine
+RUN if [ -d /home/xclient/.wine ]; then \
+        chown -R xclient /home/xclient/.wine; \
+    fi
+
+# Permitir que xclient use sudo sem senha para chown
+RUN echo "xclient ALL=(ALL) NOPASSWD: /bin/chown, /bin/mkdir, /bin/cp, /bin/chmod" >> /etc/sudoers
+
+# Voltar ao usuário xclient para usar o Wine configurado
+USER xclient
+
 WORKDIR /build
 
-# Copiar scripts e arquivos de configuração
 COPY download-rustdesk.sh /build/
 COPY setup.iss /build/
 COPY build.sh /build/
 
-# Tornar scripts executáveis
-RUN chmod +x /build/download-rustdesk.sh /build/build.sh
+# Ajustar permissões dos scripts como root
+USER root
+RUN chmod +x /build/download-rustdesk.sh /build/build.sh && \
+    chown -R xclient /build && \
+    mkdir -p /build/Output && \
+    chmod 777 /build/Output
 
-# Criar diretório para output
-RUN mkdir -p /build/Output
+# Voltar ao usuário xclient
+USER xclient
 
-# Variáveis de ambiente para configuração do RustDesk
 ENV ID_SERVER_HOST=""
 ENV ENCRYPTION_KEY=""
-ENV APP_NAME="RustDesk - Acesso Remoto"
+ENV APP_NAME="Acesso Remoto"
 ENV APP_VERSION="1.0.0"
 ENV APP_PUBLISHER="Sua Empresa"
 
-# Volume para output dos instaladores gerados
 VOLUME ["/build/Output"]
 
-# Script de entrada que executa todo o processo
 ENTRYPOINT ["/build/build.sh"]

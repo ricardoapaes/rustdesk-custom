@@ -33,7 +33,7 @@ echo "📦 Etapa 1: Baixando a última versão do RustDesk..."
 if [ -f "/build/rustdesk.env" ]; then
     source /build/rustdesk.env
     echo "✅ Informações carregadas:"
-    echo "   📁 Arquivo MSI: $MSI_FILE"
+    echo "   📁 Arquivo EXE: $EXE_FILE"
     echo "   🏷️  Versão: $RUSTDESK_VERSION"
 else
     echo "❌ Erro: Arquivo de ambiente não encontrado"
@@ -41,7 +41,7 @@ else
 fi
 
 # Definir variáveis de ambiente para o Inno Setup
-export MSI_FILE
+export EXE_FILE
 export RUSTDESK_VERSION
 
 # Definir valores padrão se não fornecidos
@@ -66,13 +66,23 @@ fi
 echo ""
 echo "🔨 Etapa 3: Compilando o instalador com Inno Setup..."
 
+# Verificar e corrigir permissões do Wine se necessário
+if [ ! -w "/home/xclient/.wine" ]; then
+    echo "🔧 Corrigindo permissões do Wine..."
+    sudo chown -R xclient /home/xclient/.wine 2>/dev/null || true
+fi
+
 # Compilar o instalador usando Inno Setup
-wine ~/.wine/drive_c/InnoSetup6/ISCC.exe /build/setup.iss
+iscc /build/setup.iss
 
 # Verificar se a compilação foi bem-sucedida
-OUTPUT_FILE="/build/Output/RustDesk_Instalador_Customizado_${RUSTDESK_VERSION}.exe"
+OUTPUT_FILE="/build/RustDesk_Instalador_Customizado_${RUSTDESK_VERSION}.exe"
 
 if [ -f "$OUTPUT_FILE" ]; then
+    # Usar sudo para copiar para o diretório de saída
+    sudo mkdir -p /build/Output
+    sudo cp "$OUTPUT_FILE" "/build/Output/"
+    sudo chmod 644 "/build/Output/$(basename "$OUTPUT_FILE")"
     echo ""
     echo "✅ Build concluído com sucesso!"
     echo "=================================================="

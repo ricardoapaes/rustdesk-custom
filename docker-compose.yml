@@ -1,22 +1,12 @@
-version: '3.8'
-
 services:
   rustdesk-builder:
-    # Use a imagem pré-construída (recomendado)
-    image: ghcr.io/ricardoapaes/rustdesk-custom:latest
-    
-    # Ou faça build local (descomente a linha abaixo e comente a linha 'image')
-    # build: .
-    
+    build: .  
     environment:
-      # Variáveis carregadas do arquivo .env
       - ID_SERVER_HOST=${ID_SERVER_HOST}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
-      - APP_NAME=${APP_NAME:-RustDesk - Instalador Personalizado}
+      - APP_NAME=${APP_NAME:-Acesso Remoto}
       - APP_VERSION=${APP_VERSION:-1.0.0}
       - APP_PUBLISHER=${APP_PUBLISHER:-Instalador Automático}
     volumes:
-      # Os instaladores gerados aparecerão na pasta ./output
       - ./output:/build/Output
-    # Remove o container após execução
     restart: "no"
