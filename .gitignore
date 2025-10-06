@@ -1,0 +1,32 @@
+# Outputs gerados
+output/
+Output/
+*.exe
+*.msi
+
+# Arquivos temporários
+rustdesk.env
+*.tmp
+*.temp
+
+# Configurações sensíveis
+.env
+
+# Logs do Docker
+*.log
+
+# Configurações sensíveis (mantenha como exemplo)
+# config.toml  # Descomente se você não quiser versionar configurações
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+.dockerignore

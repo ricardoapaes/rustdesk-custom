@@ -1,0 +1,34 @@
+# Arquivo de configuração opcional para RustDesk
+# Este arquivo será incluído no instalador se estiver presente
+
+# Configurações do servidor (serão sobrescritas pelas variáveis de ambiente se definidas)
+[server]
+# id = "seu.servidor.com"
+# relay = "seu.servidor.com:21117"
+# api = "seu.servidor.com:21114"
+
+# Configurações de qualidade
+[display]
+# compress = "balanced"  # low, balanced, high
+# quality = "balanced"   # low, balanced, high
+
+# Configurações de segurança  
+[security]
+# password = ""
+# permanent_password = ""
+
+# Configurações de rede
+[network]
+# direct_server = false
+# relay_server = true
+
+# Configurações de interface
+[ui]
+# hide_cm = false
+# hide_connection_type = false
+# hide_network_setting = false
+
+[custom]
+# Configurações personalizadas da sua empresa
+# company_name = "Sua Empresa"
+# support_url = "https://suporte.empresa.com"
