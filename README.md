@@ -1,5 +1,9 @@
 # Gerador de Instalador RustDesk Personalizado
 
+[![Docker Build](https://github.com/ricardoapaes/rustdesk-custom/actions/workflows/docker-build.yml/badge.svg)](https://github.com/ricardoapaes/rustdesk-custom/actions/workflows/docker-build.yml)
+[![CI](https://github.com/ricardoapaes/rustdesk-custom/actions/workflows/ci.yml/badge.svg)](https://github.com/ricardoapaes/rustdesk-custom/actions/workflows/ci.yml)
+[![Container Registry](https://img.shields.io/badge/container-ghcr.io-blue)](https://github.com/ricardoapaes/rustdesk-custom/pkgs/container/rustdesk-custom)
+
 Este projeto automatiza a criação de instaladores personalizados do RustDesk usando Docker e Inno Setup. O sistema baixa automaticamente a última versão MSI x64 do repositório oficial do RustDesk e gera um instalador customizado com suas configurações.
 
 ## 🚀 Características
@@ -10,6 +14,16 @@ Este projeto automatiza a criação de instaladores personalizados do RustDesk u
 - ✅ Instalação silenciosa como serviço do Windows
 - ✅ Container Docker isolado para build
 - ✅ Suporte a configurações personalizadas
+- ✅ Imagens Docker pré-construídas no GitHub Container Registry
+- ✅ CI/CD automatizado com GitHub Actions
+
+## 📦 Imagens Docker
+
+As imagens são automaticamente construídas e publicadas no GitHub Container Registry:
+
+- **Registry:** `ghcr.io/ricardoapaes/rustdesk-custom`
+- **Tags:** `latest`, `develop`, versões específicas (ex: `v1.0.0`)
+- **Documentação completa:** [DOCKER_REGISTRY.md](DOCKER_REGISTRY.md)
 
 ## 📋 Pré-requisitos
 
@@ -18,13 +32,26 @@ Este projeto automatiza a criação de instaladores personalizados do RustDesk u
 
 ## 🔧 Como Usar
 
-### 1. Build da imagem Docker
+### 1. Usando imagem pré-construída (Recomendado)
+
+```bash
+# Usar imagem do GitHub Container Registry
+docker run --rm \
+  -e ID_SERVER_HOST="seu.servidor.com" \
+  -e ENCRYPTION_KEY="sua_chave_de_criptografia" \
+  -e APP_NAME="RustDesk - Sua Empresa" \
+  -e APP_PUBLISHER="Sua Empresa Ltda" \
+  -v $(pwd)/output:/build/Output \
+  ghcr.io/ricardoapaes/rustdesk-custom:latest
+```
+
+### 2. Build local da imagem Docker
 
 ```bash
 docker build -t rustdesk-installer-builder .
 ```
 
-### 2. Gerar instalador com configuração automática
+### 3. Gerar instalador com configuração automática
 
 ```bash
 docker run --rm \
@@ -36,7 +63,7 @@ docker run --rm \
   rustdesk-installer-builder
 ```
 
-### 3. Usando docker-compose (recomendado)
+### 4. Usando docker-compose (recomendado)
 
 ```bash
 # 1. Configure suas variáveis de ambiente
