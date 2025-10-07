@@ -30,6 +30,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 ; Valores obtidos das variáveis de ambiente
 #define ID_SERVER_HOST GetEnv("ID_SERVER_HOST")
 #define ENCRYPTION_KEY GetEnv("ENCRYPTION_KEY")
+#define DEFAULT_PASSWORD GetEnv("DEFAULT_PASSWORD")
 #define MSI_FILE GetEnv("MSI_FILE")
 
 [Files]
@@ -41,15 +42,24 @@ Source: "{#MSI_FILE}"; DestDir: "{tmp}"; DestName: "rustdesk.msi"; Flags: ignore
 Filename: "msiexec.exe"; Parameters: "/i ""{tmp}\rustdesk.msi"" INSTALLFOLDER=""{app}"" /quiet"; StatusMsg: "Instalando RustDesk na pasta personalizada..."; Flags: waituntilterminated; Check: IsConfigValid()
 ; 2. Configura o servidor e chave usando o método testado
 Filename: "{app}\rustdesk.exe"; Parameters: "--config ""host={#ID_SERVER_HOST},key={#ENCRYPTION_KEY}"""; WorkingDir: "{app}"; StatusMsg: "Configurando servidor personalizado..."; Flags: runhidden waituntilterminated; Check: IsConfigValid()
+; 3. Configura senha fixa
+Filename: "{app}\rustdesk.exe"; Parameters: "--password ""{#DEFAULT_PASSWORD}"""; WorkingDir: "{app}"; StatusMsg: "Configurando senha fixa..."; Flags: runhidden waituntilterminated; Check: IsPasswordValid()
+; 5. Inicia o serviço RustDesk automaticamente
+Filename: "net"; Parameters: "start RustDesk"; StatusMsg: "Iniciando serviço RustDesk..."; Flags: runhidden waituntilterminated; Check: IsConfigValid()
 
 [UninstallRun]
 ; Para o serviço antes da desinstalação
 Filename: "net"; Parameters: "stop RustDesk"; Flags: runhidden waituntilterminated; RunOnceId: "StopRustDeskService"
-; Desinstala o MSI
-Filename: "msiexec.exe"; Parameters: "/x ""{tmp}\rustdesk.msi"" /quiet"; Flags: waituntilterminated; RunOnceId: "UninstallRustDeskMSI"
+; Desinstala o RustDesk usando o próprio executável
+Filename: "{app}\rustdesk.exe"; Parameters: "--uninstall"; WorkingDir: "{app}"; Flags: runhidden waituntilterminated; RunOnceId: "UninstallRustDesk"
 
 [Code]
 function IsConfigValid(): Boolean;
 begin
   Result := ('{#ID_SERVER_HOST}' <> '') and ('{#ENCRYPTION_KEY}' <> '');
+end;
+
+function IsPasswordValid(): Boolean;
+begin
+  Result := ('{#DEFAULT_PASSWORD}' <> '');
 end;
