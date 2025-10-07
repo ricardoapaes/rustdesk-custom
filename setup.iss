@@ -37,9 +37,19 @@ ArchitecturesInstallIn64BitMode=x64compatible
 ; Inclui o arquivo MSI baixado automaticamente
 Source: "{#MSI_FILE}"; DestDir: "{tmp}"; DestName: "rustdesk.msi"; Flags: ignoreversion
 
+[Icons]
+; Cria atalho personalizado na área de trabalho
+Name: "{autodesktop}\{#GetEnv("APP_NAME") != "" ? GetEnv("APP_NAME") : "RustDesk - Acesso Remoto"}"; Filename: "{app}\rustdesk.exe"; Tasks: desktopicon
+; Cria atalho personalizado no menu iniciar
+Name: "{autoprograms}\{#GetEnv("APP_NAME") != "" ? GetEnv("APP_NAME") : "RustDesk - Acesso Remoto"}"; Filename: "{app}\rustdesk.exe"
+
+[Tasks]
+; Pergunta se o usuário quer atalho na área de trabalho
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+
 [Run]
-; 1. Instala o RustDesk MSI na pasta escolhida pelo usuário
-Filename: "msiexec.exe"; Parameters: "/i ""{tmp}\rustdesk.msi"" INSTALLFOLDER=""{app}"" /quiet"; StatusMsg: "Instalando RustDesk na pasta personalizada..."; Flags: waituntilterminated; Check: IsConfigValid()
+; 1. Instala o RustDesk MSI na pasta escolhida pelo usuário (sem atalhos)
+Filename: "msiexec.exe"; Parameters: "/i ""{tmp}\rustdesk.msi"" INSTALLFOLDER=""{app}"" DESKTOPSHORTCUT=0 STARTMENUSHORTCUT=0 /quiet"; StatusMsg: "Instalando RustDesk na pasta personalizada..."; Flags: waituntilterminated; Check: IsConfigValid()
 ; 2. Configura o servidor e chave usando o método testado
 Filename: "{app}\rustdesk.exe"; Parameters: "--config ""host={#ID_SERVER_HOST},key={#ENCRYPTION_KEY}"""; WorkingDir: "{app}"; StatusMsg: "Configurando servidor personalizado..."; Flags: runhidden waituntilterminated; Check: IsConfigValid()
 ; 3. Configura senha fixa
