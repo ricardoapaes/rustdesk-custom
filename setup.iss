@@ -34,33 +34,24 @@ ArchitecturesInstallIn64BitMode=x64compatible
 #define MSI_FILE GetEnv("MSI_FILE")
 
 [Files]
-; Inclui o arquivo MSI baixado automaticamente
 Source: "{#MSI_FILE}"; DestDir: "{tmp}"; DestName: "rustdesk.msi"; Flags: ignoreversion
 
 [Icons]
-; Cria atalho personalizado na área de trabalho
 Name: "{autodesktop}\{#GetEnv("APP_NAME") != "" ? GetEnv("APP_NAME") : "RustDesk - Acesso Remoto"}"; Filename: "{app}\app\rustdesk.exe"; Tasks: desktopicon
-; Cria atalho personalizado no menu iniciar
 Name: "{autoprograms}\{#GetEnv("APP_NAME") != "" ? GetEnv("APP_NAME") : "RustDesk - Acesso Remoto"}"; Filename: "{app}\app\rustdesk.exe"
 
 [Tasks]
-; Pergunta se o usuário quer atalho na área de trabalho
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Run]
-; 1. Instala o RustDesk MSI na subpasta "app" (sem atalhos)
-Filename: "msiexec.exe"; Parameters: "/i ""{tmp}\rustdesk.msi"" INSTALLFOLDER=""{app}\app"" DESKTOPSHORTCUT=0 STARTMENUSHORTCUT=0 /quiet"; StatusMsg: "Instalando RustDesk na pasta personalizada..."; Flags: waituntilterminated; Check: IsConfigValid()
-; 2. Configura o servidor e chave usando o método testado
+Filename: "msiexec.exe"; Parameters: "/i ""{tmp}\rustdesk.msi"" INSTALLFOLDER=""{app}\app"" CREATESTARTMENUSHORTCUTS=""N"" CREATEDESKTOPSHORTCUTS=""N"" INSTALLPRINTER=""N"" /quiet"; StatusMsg: "Instalando RustDesk na pasta personalizada..."; Flags: waituntilterminated; Check: IsConfigValid()
+Filename: "cmd.exe"; Parameters: "/c if exist ""{autodesktop}\RustDesk.lnk"" del ""{autodesktop}\RustDesk.lnk"""; StatusMsg: "Removendo atalhos indesejados..."; Flags: runhidden waituntilterminated
 Filename: "{app}\app\rustdesk.exe"; Parameters: "--config ""host={#ID_SERVER_HOST},key={#ENCRYPTION_KEY}"""; WorkingDir: "{app}\app"; StatusMsg: "Configurando servidor personalizado..."; Flags: runhidden waituntilterminated; Check: IsConfigValid()
-; 3. Configura senha fixa
 Filename: "{app}\app\rustdesk.exe"; Parameters: "--password ""{#DEFAULT_PASSWORD}"""; WorkingDir: "{app}\app"; StatusMsg: "Configurando senha fixa..."; Flags: runhidden waituntilterminated; Check: IsPasswordValid()
-; 5. Inicia o serviço RustDesk automaticamente
 Filename: "net"; Parameters: "start RustDesk"; StatusMsg: "Iniciando serviço RustDesk..."; Flags: runhidden waituntilterminated; Check: IsConfigValid()
 
 [UninstallRun]
-; Para o serviço antes da desinstalação
 Filename: "net"; Parameters: "stop RustDesk"; Flags: runhidden waituntilterminated; RunOnceId: "StopRustDeskService"
-; Desinstala o RustDesk usando o próprio executável
 Filename: "{app}\app\rustdesk.exe"; Parameters: "--uninstall"; WorkingDir: "{app}\app"; Flags: runhidden waituntilterminated; RunOnceId: "UninstallRustDesk"
 
 [Code]
