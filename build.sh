@@ -33,7 +33,7 @@ echo "📦 Etapa 1: Baixando a última versão do RustDesk..."
 if [ -f "/build/rustdesk.env" ]; then
     source /build/rustdesk.env
     echo "✅ Informações carregadas:"
-    echo "   📁 Arquivo EXE: $EXE_FILE"
+    echo "   📁 Arquivo MSI: $MSI_FILE"
     echo "   🏷️  Versão: $RUSTDESK_VERSION"
 else
     echo "❌ Erro: Arquivo de ambiente não encontrado"
@@ -41,7 +41,7 @@ else
 fi
 
 # Definir variáveis de ambiente para o Inno Setup
-export EXE_FILE
+export MSI_FILE
 export RUSTDESK_VERSION
 
 # Definir valores padrão se não fornecidos

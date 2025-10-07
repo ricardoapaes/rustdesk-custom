@@ -4,6 +4,7 @@ services:
     environment:
       - ID_SERVER_HOST=${ID_SERVER_HOST}
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - MSI_FILE=${MSI_FILE}
       - APP_NAME=${APP_NAME:-Acesso Remoto}
       - APP_VERSION=${APP_VERSION:-1.0.0}
       - APP_PUBLISHER=${APP_PUBLISHER:-Instalador Automático}

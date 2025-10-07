@@ -1,4 +1,4 @@
-; Script Inno Setup para RustDesk - Instalação com Executável
+; Script Inno Setup para RustDesk - Instalação com MSI
 ; Gerado automaticamente para trabalhar com downloads do GitHub
 
 [Setup]
@@ -14,7 +14,7 @@ SolidCompression=yes
 OutputDir=.
 OutputBaseFilename=RustDesk_Instalador_Customizado_{#GetEnv("RUSTDESK_VERSION")}
 AppPublisher={#GetEnv("APP_PUBLISHER") != "" ? GetEnv("APP_PUBLISHER") : "Instalador Customizado"}
-; Arquivo EXE será incluído automaticamente
+; Arquivo MSI será incluído automaticamente
 
 ; --- Configurações de Instalação ---
 ; Instala para todos os usuários (necessita de privilégios de administrador)
@@ -30,36 +30,23 @@ ArchitecturesInstallIn64BitMode=x64compatible
 ; Valores obtidos das variáveis de ambiente
 #define ID_SERVER_HOST GetEnv("ID_SERVER_HOST")
 #define ENCRYPTION_KEY GetEnv("ENCRYPTION_KEY")
-#define EXE_FILE GetEnv("EXE_FILE")
+#define MSI_FILE GetEnv("MSI_FILE")
 
 [Files]
-; Inclui o arquivo EXE baixado automaticamente
-Source: "{#EXE_FILE}"; DestDir: "{app}"; DestName: "rustdesk.exe"; Flags: ignoreversion
-
-[Icons]
-; Cria um atalho no Menu Iniciar
-Name: "{group}\RustDesk Acesso Remoto"; Filename: "{app}\rustdesk.exe"
-; Cria um atalho na Área de Trabalho (Desktop)
-Name: "{commondesktop}\RustDesk Acesso Remoto"; Filename: "{app}\rustdesk.exe"
+; Inclui o arquivo MSI baixado automaticamente
+Source: "{#MSI_FILE}"; DestDir: "{tmp}"; DestName: "rustdesk.msi"; Flags: ignoreversion
 
 [Run]
-; 1. Cria diretório de configuração
-Filename: "cmd.exe"; Parameters: "/c md ""%APPDATA%\RustDesk\config"""; StatusMsg: "Criando diretório de configuração..."; Flags: runhidden
-; 2. Cria arquivo de configuração temporário para importação
-Filename: "cmd.exe"; Parameters: "/c echo custom-rendezvous-server = ""{#ID_SERVER_HOST}"" > ""{tmp}\rustdesk_config.toml"""; StatusMsg: "Preparando configuração..."; Flags: runhidden; Check: IsConfigValid()
-Filename: "cmd.exe"; Parameters: "/c echo key = ""{#ENCRYPTION_KEY}"" >> ""{tmp}\rustdesk_config.toml"""; StatusMsg: "Preparando chave..."; Flags: runhidden; Check: IsConfigValid()
-; 3. Instala como serviço
-Filename: "{app}\rustdesk.exe"; Parameters: "--install-service"; WorkingDir: "{app}"; StatusMsg: "Instalando serviço RustDesk..."; Flags: runhidden waituntilterminated
-; 4. Importa a configuração usando --import-config
-Filename: "{app}\rustdesk.exe"; Parameters: "--import-config ""{tmp}\rustdesk_config.toml"""; WorkingDir: "{app}"; StatusMsg: "Importando configuração..."; Flags: runhidden waituntilterminated; Check: IsConfigValid()
-; 5. Inicia o serviço
-Filename: "net"; Parameters: "start RustDesk"; StatusMsg: "Iniciando serviço RustDesk..."; Flags: runhidden waituntilterminated
+; 1. Instala o RustDesk MSI na pasta escolhida pelo usuário
+Filename: "msiexec.exe"; Parameters: "/i ""{tmp}\rustdesk.msi"" INSTALLFOLDER=""{app}"" /quiet"; StatusMsg: "Instalando RustDesk na pasta personalizada..."; Flags: waituntilterminated; Check: IsConfigValid()
+; 2. Configura o servidor e chave usando o método testado
+Filename: "{app}\rustdesk.exe"; Parameters: "--config ""host={#ID_SERVER_HOST},key={#ENCRYPTION_KEY}"""; WorkingDir: "{app}"; StatusMsg: "Configurando servidor personalizado..."; Flags: runhidden waituntilterminated; Check: IsConfigValid()
 
 [UninstallRun]
 ; Para o serviço antes da desinstalação
 Filename: "net"; Parameters: "stop RustDesk"; Flags: runhidden waituntilterminated; RunOnceId: "StopRustDeskService"
-; Remove o serviço
-Filename: "{app}\rustdesk.exe"; Parameters: "--uninstall-service"; WorkingDir: "{app}"; Flags: runhidden waituntilterminated; RunOnceId: "UninstallRustDeskService"
+; Desinstala o MSI
+Filename: "msiexec.exe"; Parameters: "/x ""{tmp}\rustdesk.msi"" /quiet"; Flags: waituntilterminated; RunOnceId: "UninstallRustDeskMSI"
 
 [Code]
 function IsConfigValid(): Boolean;
